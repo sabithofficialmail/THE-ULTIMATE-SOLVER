@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>THE ULTIMATE SOLVER</title>
+    <link rel="stylesheet" href="THE ULTIMATE SOLVER.css" />
+  </head>
+  <body>
+    <header>
+      <h1 id="hm" title="Home" class="u1">🧊 THE ULTIMATE SOLVER</h1>
+      <button id="th" title="Toggle dark mode">🌙 Dark</button>
+    </header>
+    <nav>
+      <button data-t="home" class="on">🏠 Home</button
+      ><button data-t="timer">Timer</button
+      ><button data-t="solver">Solver</button
+      ><button data-t="prog">Progress</button
+      ><button data-t="algs">Algorithms</button
+      ><button data-t="cube3d">3D Cube</button
+      ><button data-t="study">Study 2x2</button>
+    </nav>
+    <main>
+      <section id="home" class="on">
+        <div class="card hero">
+          <h2>Welcome back 👋</h2>
+          <p class="mut u2">
+            Learn, time and solve the 2x2 cube, all in one place.
+          </p>
+          <div class="stats" id="hs"></div>
+          <div class="bar"><div id="gb"></div></div>
+          <div class="row u3">
+            <span class="mut">Today’s solves vs your daily goal</span
+            ><span><button id="gm">−</button> <button id="gp">+</button></span>
+          </div>
+        </div>
+        <div class="tiles">
+          <button data-go="timer">
+            <span>⏱</span><b>Timer</b><small>Time your solves</small>
+          </button>
+          <button data-go="solver">
+            <span>🧩</span><b>Solver</b><small>Enter colours, get moves</small>
+          </button>
+          <button data-go="prog">
+            <span>📈</span><b>Progress</b><small>Graphs and daily stats</small>
+          </button>
+          <button data-go="algs">
+            <span>📖</span><b>Algorithms</b><small>OLL, PBL, CLL, Ortega</small>
+          </button>
+          <button data-go="cube3d">
+            <span>🧊</span><b>3D Cube</b
+            ><small>Turn, scramble, solve, time</small>
+          </button>
+          <button data-go="study" class="big">
+            <span>📚</span><b>Study 2x2</b><small id="nx"></small>
+          </button>
+        </div>
+      </section>
+      <section id="cube3d">
+        <div class="card">
+          <div class="row u4">
+            <b>🧊 Interactive 3D cube</b
+            ><span class="mut"
+              >Drag to rotate any way · keys U R F D L B (Shift = prime)</span
+            >
+          </div>
+          <div id="stage">
+            <div id="rot"><div id="cu"></div></div>
+          </div>
+          <div id="ct">0.00</div>
+          <div class="mut u5" id="cm">0 moves</div>
+          <div class="mut u5" id="c3"></div>
+          <div class="row">
+            <button class="p" id="c-sc">Scramble</button
+            ><button id="c-rs">Reset cube</button
+            ><button id="c-so">Show solution</button
+            ><button id="c-pl">▶ Play solution</button
+            ><button id="c-vw">Reset view</button>
+          </div>
+          <div class="row" id="cmv"></div>
+          <label class="mut u6"
+            ><input type="checkbox" id="c-rel" checked /> Moves follow the side
+            I'm facing</label
+          >
+          <div class="mut u5" id="cview"></div>
+          <div class="mut u7" id="csc"></div>
+          <div id="cso" class="u8"></div>
+          <p class="mut u9">
+            The timer starts on your first move after a scramble and stops when
+            the cube is solved. Solves you finish without using the solution are
+            saved to your Progress tab.
+          </p>
+        </div>
+      </section>
+      <section id="study">
+        <div class="card">
+          <b>📚 Study 2x2</b>
+          <p class="mut u10">
+            Work through the lessons in order, from basic moves to Ortega, PBL
+            and CLL. Open a lesson, then mark it done.
+          </p>
+          <div class="bar"><div id="sp"></div></div>
+          <div class="mut" id="sl"></div>
+        </div>
+        <div id="lessons"></div>
+      </section>
+      <section id="timer">
+        <div class="card">
+          <div class="mut u5">Scramble</div>
+          <div id="scr"></div>
+          <div id="tm">0.00</div>
+          <div class="mut u5">
+            <span class="dh"
+              >Hold <b>Space</b> (or press and hold the timer) until it turns
+              green, release to start, tap/press any key to stop.</span
+            ><span class="mh"
+              >Press and hold the timer until it turns green, lift your finger
+              to start, then tap anywhere to stop.</span
+            >
+          </div>
+          <div class="row">
+            <button id="ns">New scramble</button
+            ><button id="ss">Solve this scramble →</button
+            ><button id="rt">Reset timer</button
+            ><button id="del">Delete last</button
+            ><button id="dnf">+2 last</button>
+          </div>
+        </div>
+        <div class="card stats" id="st"></div>
+        <div class="card">
+          <div class="row u11">
+            <b>Times</b
+            ><span
+              ><button id="cp">Copy</button>
+              <button id="clr">Clear all</button></span
+            >
+          </div>
+          <div id="list"></div>
+        </div>
+      </section>
+      <section id="algs">
+        <input type="search" id="q" placeholder="Search algorithms…" />
+        <div class="chips" id="chips"></div>
+        <div class="card" id="al"></div>
+        <p class="mut">
+          Diagrams show the cube as you see it before doing the algorithm: the
+          top layer with its side stickers, and for PBL a second diagram of the
+          bottom layer seen from below. Tip: tap “Inverse” to get the reverse
+          alg, useful for recognizing cases or fixing a misstep. All algs use R,
+          U, F, D moves so you never need to regrip.
+        </p>
+      </section>
+      <section id="solver">
+        <div class="card">
+          <b>Enter your cube</b>
+          <p class="mut u12">
+            The cube starts blank: pick a color, then tap each sticker to fill
+            it. Any color scheme works, and the solver detects it from the cube
+            itself. Faces are drawn as seen from outside: U on top, then L F R
+            B, then D.
+          </p>
+          <div class="pal" id="pal"></div>
+          <div class="net" id="net"></div>
+          <div class="mut u5" id="cnt"></div>
+          <div class="row">
+            <button class="p" id="go">Solve</button
+            ><button id="bl">Clear all (blank)</button
+            ><button id="rs">Reset solved</button
+            ><button id="rn">Random scramble</button>
+          </div>
+        </div>
+        <div class="card">
+          <b>Solution</b>
+          <div id="out" class="mut u13">Nothing yet.</div>
+          <div class="row u14"><button id="cs" hidden>Copy</button></div>
+        </div>
+      </section>
+      <section id="prog">
+        <div class="chips" id="rng"></div>
+        <div class="card">
+          <b>Time graph</b>
+          <div id="gr"></div>
+        </div>
+        <div class="card stats" id="pb"></div>
+        <div class="card">
+          <b>Day by day</b>
+          <span class="mut"
+            >(<span class="up">▲</span> = faster mean than the previous
+            day)</span
+          >
+          <div class="u15"><table id="days"></table></div>
+        </div>
+        <div class="card">
+          <b>Backup</b>
+          <p class="mut u10">
+            Your times save automatically in this browser and are here whenever
+            you come back. To move them to another device, copy the data, paste
+            it there into the box below and tap Import.
+          </p>
+          <div class="row u14">
+            <button id="ex">Copy data</button><button id="im">Import</button>
+          </div>
+          <textarea id="ta" placeholder="Paste exported data here"></textarea>
+        </div>
+      </section>
+    </main>
+    <footer>
+      🧊 <b>THE ULTIMATE SOLVER™</b><br />Built by <b>Muhammed Sabith</b> · ©
+      2026 Muhammed Sabith. All rights reserved.
+    </footer>
+    <div id="toast"></div>
+    <script src="THE ULTIMATE SOLVER.js"></script>
+  </body>
+</html>
