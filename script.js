@@ -961,7 +961,7 @@ const LES = [
   [
     "moves",
     "Basic moves (notation)",
-    `<div class="lesson"><p>Three letters are enough: <b>R</b> (right face), <b>U</b> (top face) and <b>F</b> (front face). A plain letter is a quarter turn <b>clockwise</b>, as if you were looking straight at that face. A prime <b>'</b> means counter-clockwise, and <b>2</b> means a half turn.</p><p>Example: <b>R U' F2</b> = right clockwise, top counter-clockwise, front half turn. L, D and B work the same way for the left, bottom and back faces.</p><p class="mut">Try it. The cube is shown unfolded: top, then left, front, right, back, then bottom.</p><div id="pg"></div></div>`,
+    `<div class="lesson"><p>Three letters are enough: <b>R</b> (right face), <b>U</b> (top face) and <b>F</b> (front face). A plain letter is a quarter turn <b>clockwise</b>, as if you were looking straight at that face. A prime <b>'</b> means counter-clockwise, and <b>2</b> means a half turn.</p><p>Example: <b>R U' F2</b> = right clockwise, top counter-clockwise, front half turn. L, D and B work the same way for the left, bottom and back faces.</p><p class="mut">Try it on the 3D cube below: drag to rotate it, then tap a move.</p><div id="pg"></div></div>`,
   ],
   [
     "trig",
@@ -999,80 +999,6 @@ const LES = [
     `<div class="lesson"><p><b>Tips.</b> Learn a few algorithms at a time and drill each one slowly 10 times before speeding up. Do a few real solves between drills. Check the Progress tab to see whether your average is really dropping.</p><table><tr><td><b>AUF / ADF</b></td><td>Adjust U face / D face: a turn to line a layer up</td></tr><tr><td><b>OLL</b></td><td>Orient last layer</td></tr><tr><td><b>PBL</b></td><td>Permute both layers</td></tr><tr><td><b>CLL</b></td><td>Corners of last layer, in one step</td></tr><tr><td><b>ao5 / ao12</b></td><td>Average of 5 or 12 solves, dropping best and worst</td></tr><tr><td><b>Inspection</b></td><td>The 15 seconds before a solve to plan your first moves</td></tr></table></div>`,
   ],
 ];
-function netEl(s) {
-  const el = document.createElement("div");
-  el.className = "net";
-  FACES.forEach((f, fi) => {
-    const d = document.createElement("div");
-    d.className = "face";
-    d.style.gridColumn = pos[fi][0] + 1;
-    d.style.gridRow = pos[fi][1] + 1;
-    for (let k = 0; k < 4; k++) {
-      const c = document.createElement("i");
-      c.style.background = COL[s[fi * 4 + k]];
-      c.style.cursor = "default";
-      d.appendChild(c);
-    }
-    el.appendChild(d);
-  });
-  return el;
-}
-function drawPg() {
-  const h = $("#pg");
-  if (!h) return;
-  h.innerHTML = "";
-  h.appendChild(netEl(pg));
-  const b = document.createElement("div");
-  b.className = "row";
-  MV.forEach((m, i) => {
-    const x = document.createElement("button");
-    x.textContent = m;
-    x.onclick = () => {
-      pg = ap(pg, i);
-      ph.push(i);
-      drawPg();
-    };
-    b.appendChild(x);
-  });
-  const u = document.createElement("button");
-  u.textContent = "↶ Undo";
-  u.onclick = () => {
-    if (ph.length) {
-      pg = ap(pg, inv(ph.pop()));
-      drawPg();
-    }
-  };
-  const r = document.createElement("button");
-  r.textContent = "Reset";
-  r.onclick = () => {
-    pg = SOLVED;
-    ph = [];
-    drawPg();
-  };
-  b.append(u, r);
-  h.appendChild(b);
-  const s = document.createElement("div");
-  s.className = "mut";
-  s.style.textAlign = "center";
-  s.textContent = ph.length
-    ? ph.map((i) => MV[i]).join(" ")
-    : "Tap a move to turn the cube.";
-  h.appendChild(s);
-}
-function pgAlg(a) {
-  pg = SOLVED;
-  ph = [];
-  a.split(" ").forEach((t) => {
-    const i = MV.indexOf(t);
-    if (i >= 0) {
-      pg = ap(pg, i);
-      ph.push(i);
-    }
-  });
-  drawPg();
-  const p = $("#pg");
-  p.scrollIntoView({ behavior: "smooth", block: "center" });
-}
 function drawQ() {
   const el = $("#qz");
   if (!el) return;
@@ -1336,9 +1262,8 @@ function rotV(ax, ay) {
 }
 let sr = "all";
 Q.rel = true;
-function vmap() {
-  const M = Q.M,
-    fs = [
+function vmap(M = Q.M) {
+  const fs = [
       [0, -1, 0],
       [1, 0, 0],
       [0, 0, 1],
@@ -1482,6 +1407,150 @@ $("#c-rel").onchange = (e) => {
   Q.rel = e.target.checked;
   vw();
 };
+function ortho(M) {
+  let [a, b] = M;
+  const n = (v) => {
+    const l = Math.hypot(...v);
+    return v.map((x) => x / l);
+  };
+  a = n(a);
+  const d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  b = n(b.map((x, i) => x - d * a[i]));
+  return [a, b, [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]];
+}
+function mini3d(h) {
+  h.innerHTML =
+    '<div class="st3"><div class="rot3"><div class="cu3"></div></div></div><div class="row"></div><label class="mut" style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:6px"><input type="checkbox" checked> Moves follow the side you face</label><div class="mut" style="text-align:center"></div>';
+  const S = { st: SOLVED, M: homeM(), q: [], hist: [], busy: false, rel: true, dr: null },
+    cu = h.querySelector(".cu3"),
+    rot = h.querySelector(".rot3"),
+    stg = h.querySelector(".st3"),
+    row = h.querySelector(".row"),
+    info = h.querySelector(".mut:last-child");
+  const vw = () => {
+    const M = S.M;
+    rot.style.transform = `scale(1.3) matrix3d(${[M[0][0], M[1][0], M[2][0], 0, M[0][1], M[1][1], M[2][1], 0, M[0][2], M[1][2], M[2][2], 0, 0, 0, 0, 1].join(",")})`;
+  };
+  const render = () => {
+    cu.innerHTML = "";
+    [...ST.map((k, i) => ({ p: k.p, n: k.n, i })), ...INN].forEach((k) => {
+      const e = document.createElement("div");
+      e.className = "sk";
+      e.style.background = k.i < 0 ? "#111" : COL[S.st[k.i]];
+      e.style.transform = skT(k);
+      e._p = k.p;
+      cu.appendChild(e);
+    });
+  };
+  const note = () => {
+    info.textContent = S.hist.length ? S.hist.map((i) => MV[i]).join(" ") : "Drag to rotate, then tap a move.";
+  };
+  const turn = (m) =>
+    new Promise((r) => {
+      const a = (m / 3) | 0,
+        k = m % 3,
+        g = document.createElement("div");
+      g.className = "lg";
+      cu.appendChild(g);
+      [...cu.children].forEach((e) => {
+        if (e !== g && IN[a](e._p)) g.appendChild(e);
+      });
+      const ang = [-90, 90, 90, 90, -90, -90][a] * [1, 2, -1][k];
+      g.getBoundingClientRect();
+      g.style.transition = "transform .2s ease-in-out";
+      g.style.transform = `rotate${"YXZYXZ"[a]}(${ang}deg)`;
+      setTimeout(() => {
+        S.st = ap(S.st, m);
+        render();
+        r();
+      }, 230);
+    });
+  async function pump() {
+    if (S.busy) return;
+    S.busy = true;
+    while (S.q.length) {
+      const [m, rec] = S.q.shift();
+      await turn(m);
+      if (rec === 1) S.hist.push(m);
+      else if (rec === 2) S.hist.pop();
+      note();
+    }
+    S.busy = false;
+  }
+  const add = (m) => {
+    if (S.rel) m = vmap(S.M)[(m / 3) | 0] * 3 + (m % 3);
+    S.q.push([m, 1]);
+    pump();
+  };
+  const btn = (t, f) => {
+    const b = document.createElement("button");
+    b.textContent = t;
+    b.onclick = f;
+    row.appendChild(b);
+  };
+  MV.forEach((m, i) => btn(m, () => add(i)));
+  btn("↶ Undo", () => {
+    if (S.hist.length && !S.busy) {
+      S.q.push([inv(S.hist[S.hist.length - 1]), 2]);
+      pump();
+    }
+  });
+  btn("Reset", () => {
+    if (!S.busy) {
+      S.st = SOLVED;
+      S.hist = [];
+      render();
+      note();
+    }
+  });
+  btn("Reset view", () => {
+    S.M = homeM();
+    vw();
+  });
+  h.querySelector("input").onchange = (e) => {
+    S.rel = e.target.checked;
+  };
+  stg.onpointerdown = (e) => {
+    S.dr = [e.clientX, e.clientY];
+    stg.setPointerCapture(e.pointerId);
+  };
+  stg.onpointermove = (e) => {
+    if (!S.dr) return;
+    S.M = ortho(mm(mm(RX(-(e.clientY - S.dr[1]) * 0.6), RY((e.clientX - S.dr[0]) * 0.6)), S.M));
+    S.dr = [e.clientX, e.clientY];
+    vw();
+  };
+  stg.onpointerup = stg.onpointercancel = () => (S.dr = null);
+  render();
+  vw();
+  note();
+  return {
+    alg: (a) => {
+      if (S.busy) return;
+      S.q = [];
+      S.st = SOLVED;
+      S.hist = [];
+      render();
+      note();
+      a.split(" ").forEach((t) => {
+        const i = MV.indexOf(t);
+        if (i >= 0) S.q.push([i, 1]);
+      });
+      pump();
+    },
+  };
+}
+let P3 = null;
+function drawPg() {
+  const h = $("#pg");
+  if (h) P3 = mini3d(h);
+}
+function pgAlg(a) {
+  if (P3) {
+    P3.alg(a);
+    $("#pg").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
 cubeStats();
 cubeRender();
 vw();
