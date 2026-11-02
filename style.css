@@ -620,3 +620,27 @@ footer {
 .u15 {
   overflow-x: auto;
 }
+.st3 {
+  height: 240px;
+  perspective: 700px;
+  position: relative;
+  touch-action: none;
+  cursor: grab;
+  overflow: hidden;
+}
+.rot3 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+.cu3 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
