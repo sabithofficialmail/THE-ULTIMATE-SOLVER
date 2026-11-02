@@ -252,6 +252,7 @@ function drawNet() {
       .join("  ") +
     "   Blank: " +
     (cn["-"] || 0);
+  if (typeof svRender === "function") svRender();
 }
 function drawPal() {
   $("#pal").innerHTML = "";
@@ -1567,6 +1568,141 @@ $("#gp").onclick = () => {
   sv("goal", ld("goal", 20) + 5);
   drawHome();
 };
+// ---------- solver: 3D cube tab ----------
+const SV = { M: homeM(), busy: false, dr: null };
+SV.cu = $("#sv-cu");
+SV.rot = $("#sv-rot");
+SV.stg = $("#sv-st");
+function svView() {
+  const M = SV.M;
+  SV.rot.style.transform = `scale(1.3) matrix3d(${[M[0][0], M[1][0], M[2][0], 0, M[0][1], M[1][1], M[2][1], 0, M[0][2], M[1][2], M[2][2], 0, 0, 0, 0, 1].join(",")})`;
+}
+function svRender() {
+  SV.cu.innerHTML = "";
+  [...ST.map((k, i) => ({ p: k.p, n: k.n, i })), ...INN].forEach((k) => {
+    const e = document.createElement("div");
+    e.className = "sk";
+    e.style.background = k.i < 0 ? "#111" : COL[net[k.i]];
+    e.style.transform = skT(k);
+    e._p = k.p;
+    SV.cu.appendChild(e);
+  });
+}
+function svLock(on) {
+  SV.busy = on;
+  ["go", "bl", "rs", "rn", "go2", "bl2", "rs2", "rn2", "pl2"].forEach(
+    (id) => ($("#" + id).disabled = on),
+  );
+}
+function svTurn(m) {
+  return new Promise((r) => {
+    const a = (m / 3) | 0,
+      k = m % 3,
+      cu = SV.cu,
+      g = document.createElement("div");
+    g.className = "lg";
+    cu.appendChild(g);
+    [...cu.children].forEach((e) => {
+      if (e !== g && IN[a](e._p)) g.appendChild(e);
+    });
+    const ang = [-90, 90, 90, 90, -90, -90][a] * [1, 2, -1][k];
+    g.getBoundingClientRect();
+    g.style.transition = "transform .35s ease-in-out";
+    g.style.transform = `rotate${"YXZYXZ"[a]}(${ang}deg)`;
+    setTimeout(() => {
+      net = ap(net, m);
+      drawNet();
+      r();
+    }, 400);
+  });
+}
+$("#go2").onclick = () => $("#go").onclick();
+$("#bl2").onclick = () => {
+  $("#bl").onclick();
+  $("#sv-i").textContent = "";
+};
+$("#rs2").onclick = () => {
+  $("#rs").onclick();
+  $("#sv-i").textContent = "";
+};
+$("#rn2").onclick = () => {
+  $("#rn").onclick();
+  $("#sv-i").textContent = "";
+};
+$("#vw2").onclick = () => {
+  SV.M = homeM();
+  svView();
+};
+$("#pl2").onclick = async () => {
+  if (SV.busy) return;
+  const o = $("#out"),
+    info = $("#sv-i");
+  if (net.includes("-")) {
+    o.className = "err";
+    o.textContent =
+      "Fill in every sticker first (" +
+      (net.split("-").length - 1) +
+      " still blank).";
+    info.textContent = "Fill every sticker in the Enter colours tab first.";
+    return;
+  }
+  const r = solve(net);
+  if (!r) {
+    o.className = "err";
+    o.textContent =
+      "No solution found. Check the colors: each color must appear 4 times and the cube must be a legal 2x2 (no single twisted corner or swapped pair).";
+    info.textContent = "This cube can't be solved. Check the colours.";
+    return;
+  }
+  if (!r.length) {
+    o.className = "";
+    o.textContent = "Already solved! 🎉";
+    info.textContent = "Already solved! 🎉";
+    return;
+  }
+  o.className = "";
+  o.textContent = fmt(r) + "   (" + r.length + " moves)";
+  $("#cs").hidden = false;
+  svLock(true);
+  for (let i = 0; i < r.length; i++) {
+    info.textContent = "Move " + (i + 1) + "/" + r.length + ": " + MV[r[i]];
+    await svTurn(r[i]);
+  }
+  info.textContent = "Solved! 🎉";
+  svLock(false);
+};
+SV.stg.onpointerdown = (e) => {
+  SV.dr = [e.clientX, e.clientY];
+  SV.stg.setPointerCapture(e.pointerId);
+};
+SV.stg.onpointermove = (e) => {
+  if (!SV.dr) return;
+  SV.M = ortho(
+    mm(mm(RX(-(e.clientY - SV.dr[1]) * 0.6), RY((e.clientX - SV.dr[0]) * 0.6)), SV.M),
+  );
+  SV.dr = [e.clientX, e.clientY];
+  svView();
+};
+SV.stg.onpointerup = SV.stg.onpointercancel = () => (SV.dr = null);
+function svTab(t) {
+  document
+    .querySelectorAll("#svt button")
+    .forEach((x) => x.classList.toggle("on", x.dataset.sv === t));
+  $("#sv-a").hidden = t !== "a";
+  $("#sv-b").hidden = t !== "b";
+}
+document
+  .querySelectorAll("#svt button")
+  .forEach((b) => (b.onclick = () => svTab(b.dataset.sv)));
+$("#to3d").onclick = () => {
+  svTab("b");
+  SV.stg.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+$("#toc").onclick = () => {
+  svTab("a");
+  $("#sv-a").scrollIntoView({ behavior: "smooth", block: "start" });
+};
+svView();
 newScr();
 render();
 drawPal();
