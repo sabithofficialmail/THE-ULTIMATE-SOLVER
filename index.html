@@ -154,6 +154,11 @@
         </p>
       </section>
       <section id="solver">
+        <div class="chips" id="svt">
+          <button class="on" data-sv="a">🎨 Enter colours</button
+          ><button data-sv="b">🧊 3D cube</button>
+        </div>
+        <div id="sv-a">
         <div class="card">
           <b>Enter your cube</b>
           <p class="mut u12">
@@ -169,7 +174,31 @@
             <button class="p" id="go">Solve</button
             ><button id="bl">Clear all (blank)</button
             ><button id="rs">Reset solved</button
-            ><button id="rn">Random scramble</button>
+            ><button id="rn">Random scramble</button
+            ><button id="to3d">🧊 View in 3D →</button>
+          </div>
+        </div>
+        </div>
+        <div id="sv-b" hidden>
+          <div class="card">
+            <b>🧊 Your cube in 3D</b>
+            <p class="mut u12">
+              The colours you pick in the first tab appear here. Drag the cube
+              to rotate it, press Solve, then Play solution to watch it solve.
+            </p>
+            <div class="st3" id="sv-st">
+              <div class="rot3" id="sv-rot"><div class="cu3" id="sv-cu"></div></div>
+            </div>
+            <div class="mut u5" id="sv-i"></div>
+            <div class="row">
+              <button id="toc">← Colour area</button
+              ><button class="p" id="go2">Solve</button
+              ><button id="bl2">Clear all (blank)</button
+              ><button id="rs2">Reset solved</button
+              ><button id="rn2">Random scramble</button
+              ><button id="pl2">▶ Play solution</button
+              ><button id="vw2">Reset view</button>
+            </div>
           </div>
         </div>
         <div class="card">
